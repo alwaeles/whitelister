@@ -2,32 +2,32 @@
 
 namespace Whitelister;
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface Controller
 {
 	/**
-	 * @param RequestInterface $request
+	 * @param ServerRequestInterface $request
 	 * @return ResponseInterface
 	 */
-	function get(RequestInterface $request): ResponseInterface;
+	function get(ServerRequestInterface $request): ResponseInterface;
 
 	/**
-	 * @param RequestInterface $request
+	 * @param ServerRequestInterface $request
 	 * @return ResponseInterface
 	 */
-	function post(RequestInterface $request): ResponseInterface;
+	function post(ServerRequestInterface $request): ResponseInterface;
 
 	/**
-	 * @param RequestInterface $request
+	 * @param ServerRequestInterface $request
 	 * @return ResponseInterface
 	 */
-	function put(RequestInterface $request): ResponseInterface;
+	function put(ServerRequestInterface $request): ResponseInterface;
 
 	/**
-	 * @param RequestInterface $request
+	 * @param ServerRequestInterface $request
 	 * @return ResponseInterface
 	 */
-	function delete(RequestInterface $request): ResponseInterface;
+	function delete(ServerRequestInterface $request): ResponseInterface;
 }

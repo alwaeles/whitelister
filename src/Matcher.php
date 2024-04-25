@@ -2,17 +2,16 @@
 
 namespace Whitelister;
 
-use Error;
-use Psr\Http\Message\RequestInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 class Matcher implements RequestHandlerInterface
 {
@@ -34,13 +33,16 @@ class Matcher implements RequestHandlerInterface
 	/**
 	 * Constructs a {@link Matcher} instance.
 	 *
+	 * @param ContainerInterface $container A PSR-11 container implementation.
 	 * @param array $controllers An associative array of path regexp to controller pairs.
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
-	public function __construct(ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory, array $controllers = [])
+	public function __construct(ContainerInterface $container, array $controllers = [])
 	{
 		$this->controllers = $controllers;
-		$this->responseFactory = $responseFactory;
-		$this->streamFactory = $streamFactory;
+		$this->responseFactory = $container->get(ResponseFactoryInterface::class);
+		$this->streamFactory = $container->get(StreamFactoryInterface::class);
 	}
 
 	/**
@@ -58,10 +60,10 @@ class Matcher implements RequestHandlerInterface
 	 * Proceeds to a route matching using the previously set up list of controller. You can provide this list at
 	 * construction or use {@link Matcher::add()} to add more controller on the fly.
 	 *
-	 * @param RequestInterface $request The request to match to a {@link Controller}.
-	 * @return ResponseInterface the response to be sent back to the user.
+	 * @param ServerRequestInterface $request The request to match to a {@link Controller}.
+	 * @return ResponseInterface The response to be sent back to the user.
 	 */
-	public function handle(RequestInterface $request): ResponseInterface
+	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
 		foreach ($this->controllers as $path => $controller) {
 			if (preg_match($path, $request->getUri()->getPath()) === 1) {

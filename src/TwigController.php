@@ -2,7 +2,10 @@
 
 namespace Whitelister;
 
-use Psr\Http\Message\RequestInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -22,16 +25,16 @@ class TwigController implements Controller
 	private string $templateName;
 
 	/**
-	 * @param Environment $twig
-	 * @param ResponseFactoryInterface $responseFactory
-	 * @param StreamFactoryInterface $streamFactory
+	 * @param ContainerInterface $container
 	 * @param string $templateName
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
-	public function __construct(Environment $twig, ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory, string $templateName)
+	public function __construct(ContainerInterface $container, string $templateName)
 	{
-		$this->twig = $twig;
-		$this->responseFactory = $responseFactory;
-		$this->streamFactory = $streamFactory;
+		$this->twig = $container->get(Environment::class);
+		$this->responseFactory = $container->get(ResponseFactoryInterface::class);
+		$this->streamFactory = $container->get(StreamFactoryInterface::class);
 		$this->templateName = $templateName;
 	}
 
@@ -39,7 +42,7 @@ class TwigController implements Controller
 	/**
 	 * @inheritDoc
 	 */
-	function get(RequestInterface $request): ResponseInterface
+	function get(ServerRequestInterface $request): ResponseInterface
 	{
 		try {
 			return $this->responseFactory->createResponse(200)
@@ -55,7 +58,7 @@ class TwigController implements Controller
 	/**
 	 * @inheritDoc
 	 */
-	function post(RequestInterface $request): ResponseInterface
+	function post(ServerRequestInterface $request): ResponseInterface
 	{
 		return $this->responseFactory->createResponse(405)
 			->withHeader('Content-Type', 'text/html')
@@ -65,7 +68,7 @@ class TwigController implements Controller
 	/**
 	 * @inheritDoc
 	 */
-	function put(RequestInterface $request): ResponseInterface
+	function put(ServerRequestInterface $request): ResponseInterface
 	{
 		return $this->responseFactory->createResponse(405)
 			->withHeader('Content-Type', 'text/html')
@@ -75,7 +78,7 @@ class TwigController implements Controller
 	/**
 	 * @inheritDoc
 	 */
-	function delete(RequestInterface $request): ResponseInterface
+	function delete(ServerRequestInterface $request): ResponseInterface
 	{
 		return $this->responseFactory->createResponse(405)
 			->withHeader('Content-Type', 'text/html')
